@@ -8,7 +8,7 @@
 import { db } from ".";
 import { createTRPCRouter } from "../../_app";
 import { procedure } from "../../_app";
-import * as _Schema from '@zenstackhq/runtime/zod/input';
+import * as _Schema from '@generated/zenstack/zod/input';
 const $Schema: typeof _Schema = (_Schema as any).default ?? _Schema;
 import { checkRead, checkMutate } from '../helper';
 

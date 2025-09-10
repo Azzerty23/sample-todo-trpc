@@ -5,7 +5,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { Prisma } from '@zenstackhq/runtime/models';
+import type { Prisma } from '../../../../generated/zenstack/models';
 import type { TRPCClientErrorLike, TRPCRequestOptions } from '@trpc/client';
 import type { UseTRPCMutationOptions, UseTRPCMutationResult, UseTRPCQueryOptions, UseTRPCQueryResult, UseTRPCInfiniteQueryOptions, UseTRPCInfiniteQueryResult } from '@trpc/react-query/shared';
 import type { AnyTRPCRouter as AnyRouter } from '@trpc/server';

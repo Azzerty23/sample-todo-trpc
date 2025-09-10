@@ -7,12 +7,20 @@
  */
 datasource db {
     provider = 'postgresql'
-    url = env('POSTGRES_PRISMA_URL')
-    directUrl = env('POSTGRES_URL_NON_POOLING')
+    url = env('DATABASE_URL')
+    directUrl = env('DIRECT_URL')
 }
 
-generator js {
-    provider = 'prisma-client-js'
+generator client {
+    provider = "prisma-client"
+    output   = "../generated/prisma"
+    previewFeatures = ["driverAdapters", "queryCompiler"]
+    runtime = "nodejs"
+}
+
+plugin enhancer {
+    provider = '@core/enhancer'
+    generatePermissionChecker = true
 }
 
 plugin trpc {
@@ -22,6 +30,7 @@ plugin trpc {
     importCreateRouter = "../../_app"
     importProcedure = "../../_app"
     generateClientHelpers = 'next'
+    zodSchemasImport = '@generated/zenstack/zod'
 }
 
 /*
