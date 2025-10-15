@@ -8,9 +8,14 @@ export type GetDbParams = {
 	connectionString: string;
 };
 
+// export function getDb({ connectionString }: GetDbParams) {
+// 	const pool = new PrismaPg({ connectionString });
+// 	const prisma = new PrismaClient({ adapter: pool });
+
+// 	return prisma;
+// }
 export function getDb({ connectionString }: GetDbParams) {
-	const pool = new PrismaPg({ connectionString });
-	const prisma = new PrismaClient({ adapter: pool });
+	const prisma = new PrismaClient();
 
 	return prisma;
 }
