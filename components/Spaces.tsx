@@ -1,16 +1,19 @@
 import type { SpaceModel } from "@generated/zenstack/models";
-import { trpc } from "@lib/trpc";
+import { useTRPC } from "@lib/trpc";
 import Link from "next/link";
+
+import { useQuery } from "@tanstack/react-query";
 
 type Props = {
 	spaces: SpaceModel[];
 };
 
 function SpaceItem({ space }: { space: SpaceModel }) {
-	const { data: listCount } = trpc.list.count.useQuery({
+    const trpc = useTRPC();
+    const { data: listCount } = useQuery(trpc.list.count.queryOptions({
 		where: { spaceId: space.id },
-	});
-	return (
+	}));
+    return (
 		<div className="w-full h-full flex relative justify-center items-center">
 			<div className="badge badge-outline badge-accent badge-sm absolute top-4 right-4">
 				{listCount}

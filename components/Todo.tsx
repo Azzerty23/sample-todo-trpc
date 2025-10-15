@@ -1,9 +1,11 @@
 import type { TodoModel, UserModel } from "@generated/zenstack/models";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import { trpc } from "@lib/trpc";
+import { useTRPC } from "@lib/trpc";
 import type { ChangeEvent } from "react";
 import Avatar from "./Avatar";
 import TimeInfo from "./TimeInfo";
+
+import { useMutation } from "@tanstack/react-query";
 
 type Props = {
 	value: TodoModel & { owner: UserModel };
@@ -12,17 +14,18 @@ type Props = {
 };
 
 export default function TodoComponent({ value, updated, deleted }: Props) {
-	const { mutateAsync: update } = trpc.todo.update.useMutation();
-	const { mutateAsync: del } = trpc.todo.delete.useMutation();
+    const trpc = useTRPC();
+    const { mutateAsync: update } = useMutation(trpc.todo.update.mutationOptions());
+    const { mutateAsync: del } = useMutation(trpc.todo.delete.mutationOptions());
 
-	const deleteTodo = async () => {
+    const deleteTodo = async () => {
 		await del({ where: { id: value.id } });
 		if (deleted) {
 			deleted(value);
 		}
 	};
 
-	const toggleCompleted = async (completed: boolean) => {
+    const toggleCompleted = async (completed: boolean) => {
 		if (completed === !!value.completedAt) {
 			return;
 		}
@@ -35,7 +38,7 @@ export default function TodoComponent({ value, updated, deleted }: Props) {
 		}
 	};
 
-	return (
+    return (
 		<div className="border rounded-lg px-8 py-4 shadow-lg flex flex-col items-center w-full lg:w-[480px]">
 			<div className="flex justify-between w-full mb-4">
 				<h3

@@ -6,7 +6,7 @@ import "dotenv/config";
 export const env = createEnv({
 	server: {
 		DATABASE_URL: z.string().url().startsWith("prisma+postgres://"), // for edge middleware
-		DIRECT_URL: z.string().url().startsWith("postgres://"),
+		// DIRECT_URL: z.string().url().startsWith("postgres://"),
 	},
 	runtimeEnv: process.env,
 });

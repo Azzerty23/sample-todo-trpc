@@ -8,14 +8,20 @@ export type GetDbParams = {
 	connectionString: string;
 };
 
+// export function getDb({ connectionString }: GetDbParams) {
+// 	const pool = new PrismaPg({ connectionString });
+// 	const prisma = new PrismaClient({ adapter: pool });
+
+// 	return prisma;
+// }
+
 export function getDb({ connectionString }: GetDbParams) {
-	const pool = new PrismaPg({ connectionString });
-	const prisma = new PrismaClient({ adapter: pool });
+	const prisma = new PrismaClient();
 
 	return prisma;
 }
 
-export const prisma = getDb({ connectionString: env.DIRECT_URL });
+export const prisma = getDb({ connectionString: env.DATABASE_URL });
 export const getEnhancedPrisma = <User extends Session["user"]>(
 	user: User | undefined,
 ) => {

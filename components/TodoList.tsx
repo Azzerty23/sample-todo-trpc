@@ -1,6 +1,6 @@
 import type { ListModel } from "@generated/zenstack/models";
 import { LockClosedIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { trpc } from "@lib/trpc";
+import { useTRPC } from "@lib/trpc";
 import { customAlphabet } from "nanoid";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,17 +9,20 @@ import type { User } from "next-auth";
 import Avatar from "./Avatar";
 import TimeInfo from "./TimeInfo";
 
+import { useMutation } from "@tanstack/react-query";
+
 type Props = {
 	value: ListModel & { owner: User };
 	deleted?: (value: ListModel) => void;
 };
 
 export default function TodoList({ value, deleted }: Props) {
-	const router = useRouter();
+    const trpc = useTRPC();
+    const router = useRouter();
 
-	const { mutateAsync: del } = trpc.list.delete.useMutation();
+    const { mutateAsync: del } = useMutation(trpc.list.delete.mutationOptions());
 
-	const deleteList = async () => {
+    const deleteList = async () => {
 		if (confirm("Are you sure to delete this list?")) {
 			await del({ where: { id: value.id } });
 			if (deleted) {
@@ -28,7 +31,7 @@ export default function TodoList({ value, deleted }: Props) {
 		}
 	};
 
-	return (
+    return (
 		<div className="card w-80 bg-base-100 shadow-xl cursor-pointer hover:bg-gray-50">
 			<Link href={`${router.asPath}/${value.id}`}>
 				<figure>

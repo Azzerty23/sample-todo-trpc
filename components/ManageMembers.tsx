@@ -2,21 +2,25 @@ import { SpaceUserRole } from "@generated/zenstack/enums";
 import type { SpaceModel } from "@generated/zenstack/models";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useCurrentUser } from "@lib/context";
-import { isTRPCClientError, trpc } from "@lib/trpc";
+import { isTRPCClientError, useTRPC } from "@lib/trpc";
 import { type ChangeEvent, type KeyboardEvent, useState } from "react";
 import { toast } from "react-toastify";
 import Avatar from "./Avatar";
+
+import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 type Props = {
 	space: SpaceModel;
 };
 
 export default function ManageMembers({ space }: Props) {
-	const [email, setEmail] = useState("");
-	const [role, setRole] = useState<SpaceUserRole>(SpaceUserRole.USER);
-	const user = useCurrentUser();
+    const trpc = useTRPC();
+    const [email, setEmail] = useState("");
+    const [role, setRole] = useState<SpaceUserRole>(SpaceUserRole.USER);
+    const user = useCurrentUser();
 
-	const { data: members } = trpc.spaceUser.findMany.useQuery({
+    const { data: members } = useQuery(trpc.spaceUser.findMany.queryOptions({
 		where: {
 			spaceId: space.id,
 		},
@@ -26,12 +30,12 @@ export default function ManageMembers({ space }: Props) {
 		orderBy: {
 			role: "desc",
 		},
-	});
+	}));
 
-	const { mutateAsync: addMember } = trpc.spaceUser.create.useMutation();
-	const { mutateAsync: delMember } = trpc.spaceUser.delete.useMutation();
+    const { mutateAsync: addMember } = useMutation(trpc.spaceUser.create.mutationOptions());
+    const { mutateAsync: delMember } = useMutation(trpc.spaceUser.delete.mutationOptions());
 
-	const inviteUser = async () => {
+    const inviteUser = async () => {
 		try {
 			const r = await addMember({
 				data: {
@@ -66,13 +70,13 @@ export default function ManageMembers({ space }: Props) {
 		}
 	};
 
-	const removeMember = async (id: string) => {
+    const removeMember = async (id: string) => {
 		if (confirm(`Are you sure to remove this member from space?`)) {
 			await delMember({ where: { id } });
 		}
 	};
 
-	return (
+    return (
 		<div>
 			<div className="flex flex-wrap gap-2 items-center mb-8 w-full">
 				<input

@@ -5,7 +5,8 @@ import type {
 	UserModel,
 } from "@generated/zenstack/models";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import { trpc } from "@lib/trpc";
+import { useTRPC } from "@lib/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import BreadCrumb from "components/BreadCrumb";
 import TodoComponent from "components/Todo";
 import WithNavBar from "components/WithNavBar";
@@ -21,22 +22,29 @@ type Props = {
 };
 
 export default function TodoList(props: Props) {
+	const trpc = useTRPC();
 	const [title, setTitle] = useState("");
 
-	const { data: todos, refetch } = trpc.todo.findMany.useQuery(
-		{
-			where: { listId: props.list.id },
-			include: {
-				owner: true,
+	const { data: todos, refetch } = useQuery(
+		trpc.todo.findMany.queryOptions(
+			{
+				where: { listId: props.list.id },
+				include: {
+					owner: true,
+				},
+				orderBy: {
+					updatedAt: "desc",
+				},
 			},
-			orderBy: {
-				updatedAt: "desc",
-			},
-		},
-		{ initialData: props.todos, enabled: !!props.list },
+			{ initialData: props.todos, enabled: !!props.list },
+		),
 	);
 
-	const { mutateAsync: createTodo } = trpc.todo.create.useMutation();
+	const { data } = useQuery(trpc.todo.findMany.queryOptions({}));
+
+	const { mutateAsync: createTodo } = useMutation(
+		trpc.todo.create.mutationOptions(),
+	);
 
 	const _createTodo = async () => {
 		try {
@@ -80,7 +88,7 @@ export default function TodoList(props: Props) {
 							setTitle(e.currentTarget.value);
 						}}
 					/>
-					<button onClick={() => _createTodo()}>
+					<button type="button" onClick={() => _createTodo()}>
 						<PlusIcon className="w-6 h-6 text-gray-500" />
 					</button>
 				</div>

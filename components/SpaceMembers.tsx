@@ -1,9 +1,11 @@
 import type { SpaceModel } from "@generated/zenstack/models";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { useCurrentSpace } from "@lib/context";
-import { trpc } from "@lib/trpc";
+import { useTRPC } from "@lib/trpc";
 import Avatar from "./Avatar";
 import ManageMembers from "./ManageMembers";
+
+import { useQuery } from "@tanstack/react-query";
 
 function ManagementDialog(space?: SpaceModel) {
 	if (!space) return undefined;
@@ -36,9 +38,10 @@ function ManagementDialog(space?: SpaceModel) {
 }
 
 export default function SpaceMembers() {
-	const space = useCurrentSpace();
+    const trpc = useTRPC();
+    const space = useCurrentSpace();
 
-	const { data: members } = trpc.spaceUser.findMany.useQuery(
+    const { data: members } = useQuery(trpc.spaceUser.findMany.queryOptions(
 		{
 			where: {
 				spaceId: space?.id,
@@ -51,9 +54,9 @@ export default function SpaceMembers() {
 			},
 		},
 		{ enabled: !!space },
-	);
+	));
 
-	return (
+    return (
 		<div className="flex items-center">
 			{ManagementDialog(space)}
 			{members && (

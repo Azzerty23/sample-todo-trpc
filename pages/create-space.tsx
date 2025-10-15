@@ -1,5 +1,5 @@
 import { SpaceUserRole } from "@generated/zenstack/enums";
-import { isTRPCClientError, trpc } from "@lib/trpc";
+import { isTRPCClientError, useTRPC } from "@lib/trpc";
 import WithNavBar from "components/WithNavBar";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
@@ -7,15 +7,18 @@ import { useSession } from "next-auth/react";
 import { type FormEvent, useState } from "react";
 import { toast } from "react-toastify";
 
+import { useMutation } from "@tanstack/react-query";
+
 const CreateSpace: NextPage = () => {
-	const { data: session } = useSession();
-	const [name, setName] = useState("");
-	const [slug, setSlug] = useState("");
+    const trpc = useTRPC();
+    const { data: session } = useSession();
+    const [name, setName] = useState("");
+    const [slug, setSlug] = useState("");
 
-	const { mutateAsync: create } = trpc.space.create.useMutation();
-	const router = useRouter();
+    const { mutateAsync: create } = useMutation(trpc.space.create.mutationOptions());
+    const router = useRouter();
 
-	const onSubmit = async (event: FormEvent) => {
+    const onSubmit = async (event: FormEvent) => {
 		event.preventDefault();
 		try {
 			const space = await create({
@@ -55,9 +58,9 @@ const CreateSpace: NextPage = () => {
 		}
 	};
 
-	return (
-		<WithNavBar>
-			<div className="flex items-center justify-center h-full">
+    return (
+        <WithNavBar>
+            <div className="flex items-center justify-center h-full">
 				<form onSubmit={onSubmit}>
 					<h1 className="text-3xl mb-8">Create a space</h1>
 					<div className="flex-col space-y-4">
@@ -114,8 +117,8 @@ const CreateSpace: NextPage = () => {
 					</div>
 				</form>
 			</div>
-		</WithNavBar>
-	);
+        </WithNavBar>
+    );
 };
 
 export default CreateSpace;

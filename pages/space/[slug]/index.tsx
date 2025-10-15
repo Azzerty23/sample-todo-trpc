@@ -4,7 +4,7 @@ import type {
 	UserModel,
 } from "@generated/zenstack/models";
 import { SpaceContext } from "@lib/context";
-import { trpc } from "@lib/trpc";
+import { useTRPC } from "@lib/trpc";
 import BreadCrumb from "components/BreadCrumb";
 import SpaceMembers from "components/SpaceMembers";
 import TodoList from "components/TodoList";
@@ -22,23 +22,27 @@ import {
 import { toast } from "react-toastify";
 import { getEnhancedPrismaFromCtx } from "server/db/enhanced";
 
+import { useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+
 function CreateDialog({ created }: { created: (list: ListModel) => void }) {
-	const space = useContext(SpaceContext);
+    const trpc = useTRPC();
+    const space = useContext(SpaceContext);
 
-	const [modalOpen, setModalOpen] = useState(false);
-	const [title, setTitle] = useState("");
-	const [_private, setPrivate] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [title, setTitle] = useState("");
+    const [_private, setPrivate] = useState(false);
 
-	const { mutateAsync: create } = trpc.list.create.useMutation();
-	const inputRef = useRef<HTMLInputElement>(null);
+    const { mutateAsync: create } = useMutation(trpc.list.create.mutationOptions());
+    const inputRef = useRef<HTMLInputElement>(null);
 
-	useEffect(() => {
+    useEffect(() => {
 		if (modalOpen) {
 			inputRef.current?.focus();
 		}
 	}, [modalOpen]);
 
-	const onSubmit = async (event: FormEvent) => {
+    const onSubmit = async (event: FormEvent) => {
 		event.preventDefault();
 
 		try {
@@ -68,7 +72,7 @@ function CreateDialog({ created }: { created: (list: ListModel) => void }) {
 		setModalOpen(false);
 	};
 
-	return (
+    return (
 		<>
 			<input
 				type="checkbox"
@@ -134,9 +138,10 @@ type Props = {
 };
 
 export default function SpaceHome(props: Props) {
-	const router = useRouter();
+    const trpc = useTRPC();
+    const router = useRouter();
 
-	const { data: lists, refetch } = trpc.list.findMany.useQuery(
+    const { data: lists, refetch } = useQuery(trpc.list.findMany.queryOptions(
 		{
 			where: {
 				space: {
@@ -154,9 +159,9 @@ export default function SpaceHome(props: Props) {
 			enabled: !!router.query.slug,
 			initialData: props.lists,
 		},
-	);
+	));
 
-	return (
+    return (
 		<WithNavBar>
 			<div className="px-8 py-2">
 				<BreadCrumb space={props.space} />

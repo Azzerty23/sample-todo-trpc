@@ -1,14 +1,17 @@
-import { isTRPCClientError, trpc } from '@lib/trpc';
+import { isTRPCClientError, useTRPC } from '@lib/trpc';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
 import { toast } from 'react-toastify';
 
+import { useMutation } from "@tanstack/react-query";
+
 export default function Signup() {
+    const trpc = useTRPC();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { mutateAsync: signup } = trpc.user.create.useMutation();
+    const { mutateAsync: signup } = useMutation(trpc.user.create.mutationOptions());
 
     async function onSignup(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
