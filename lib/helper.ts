@@ -1,5 +1,5 @@
 /******************************************************************************
- * Enhanced tRPC hooks with improved type inference
+ * Enhance useTRPC with improved type inference
  ******************************************************************************/
 
 import type { AnyTRPCRouter as AnyRouter } from '@trpc/server';
@@ -37,7 +37,7 @@ export function createUseTRPC<
     originalUseTRPC: () => TRPCOptionsProxy<TRouter>
 ): () => DeepOverrideAtPath<TRPCOptionsProxy<TRouter>, ClientType<TRouter>, TPath> {
     return () => {
-        const proxy = originalUseTRPC();
-        return proxy as DeepOverrideAtPath<TRPCOptionsProxy<TRouter>, ClientType<TRouter>, TPath>;
+        const useTRPC = originalUseTRPC();
+        return useTRPC as DeepOverrideAtPath<TRPCOptionsProxy<TRouter>, ClientType<TRouter>, TPath>;
     };
 }
