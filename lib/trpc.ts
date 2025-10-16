@@ -1,15 +1,12 @@
-import {
-	createTRPCClient,
-	httpBatchLink,
-	TRPCClientError,
-} from "@trpc/client";
+import { QueryClient } from "@tanstack/react-query";
+import { createTRPCClient, httpBatchLink, TRPCClientError } from "@trpc/client";
 import {
 	createTRPCContext,
 	createTRPCOptionsProxy,
 } from "@trpc/tanstack-react-query";
-import { QueryClient } from "@tanstack/react-query";
 import superjson from "superjson";
 import type { AppRouter } from "../server/routers/_app";
+import { createUseTRPC } from "./helper";
 
 function getBaseUrl() {
 	if (typeof window !== "undefined") return "";
@@ -37,8 +34,12 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
 	queryClient,
 });
 
-export const { TRPCProvider, useTRPC, useTRPCClient } =
-	createTRPCContext<AppRouter>();
+const trpcContext = createTRPCContext<AppRouter>();
+
+export const { TRPCProvider, useTRPCClient } = trpcContext;
+
+// Enhanced useTRPC hook with improved type inference
+export const useTRPC = createUseTRPC<AppRouter>(trpcContext.useTRPC);
 
 export function isTRPCClientError(
 	error: unknown,
