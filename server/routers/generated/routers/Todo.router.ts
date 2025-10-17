@@ -11,6 +11,24 @@ import * as _Schema from '@generated/zenstack/zod/input';
 const $Schema: typeof _Schema = (_Schema as any).default ?? _Schema;
 import { checkRead, checkMutate } from '../helper';
 
+/**
+ * Handle cursor-based pagination for tanstack infinite queries.
+ * Removes `direction` field added by tanstack and adds skip: 1 when cursor is present by default.
+ */
+function handleCursorPagination<T extends { direction?: string; cursor?: any; skip?: number }>(
+    input: T | undefined | null
+): Omit<T, 'direction'> | undefined {
+    if (!input) return undefined;
+
+    const { direction: _direction, cursor, skip, ...rest } = input;
+
+	return {
+		...rest,
+		cursor,
+		skip: skip ?? (cursor ? 1 : 0),
+	} as Omit<T, 'direction'>;
+}
+
 export default function createRouter() {
     return createTRPCRouter({
 
@@ -28,15 +46,7 @@ export default function createRouter() {
 
         findFirstOrThrow: procedure.input($Schema.TodoInputSchema.findFirst.optional()).query(({ ctx, input }) => checkRead(db(ctx).todo.findFirstOrThrow(input as any))),
 
-        findMany: procedure.input($Schema.TodoInputSchema.findMany.optional()).query(({ ctx, input }) => {
-			const { cursor, ...rest } = input || {};
-			const modifiedInput = {
-						...rest,
-						skip: cursor ? 1 : 0,
-						cursor: cursor ?? undefined,
-				  };
-			return checkRead(db(ctx).todo.findMany(modifiedInput as any));
-		}),
+        findMany: procedure.input($Schema.TodoInputSchema.findMany.optional()).query(({ ctx, input }) => checkRead(db(ctx).todo.findMany(handleCursorPagination(input) as any))),
 
         findUnique: procedure.input($Schema.TodoInputSchema.findUnique).query(({ ctx, input }) => checkRead(db(ctx).todo.findUnique(input as any))),
 

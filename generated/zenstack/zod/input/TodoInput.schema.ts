@@ -79,14 +79,13 @@ export const TodoInputSchema = {
 					TodoOrderByWithRelationInputObjectSchema.array(),
 				])
 				.optional(),
-			cursor: TodoWhereUniqueInputObjectSchema.optional(), // Todo: check that
+			cursor: TodoWhereUniqueInputObjectSchema.optional(),
 			take: z.number().optional(),
 			skip: z.number().optional(),
 			distinct: z.array(TodoScalarFieldEnumSchema).optional(),
-			direction: z.string().optional(), // custom field for client side use
+			direction: z.string().optional(), // added by tanstack infinite query
 		})
-		.strict()
-		.transform(({ direction, ...rest }) => rest),
+		.strict(),
 	create: z
 		.object({
 			select: z.lazy(() => TodoSelectObjectSchema.optional()),

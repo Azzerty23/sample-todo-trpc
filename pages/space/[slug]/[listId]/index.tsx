@@ -47,13 +47,12 @@ export default function TodoList(props: Props) {
 					where: { listId: props.list.id },
 					include: { owner: true },
 					take: 1,
+					// skip: pageParam ? 1 : 0, // we do not have access to pageParam with infiniteQueryOptions
 					orderBy: { updatedAt: "asc" },
 				},
 				{
 					initialPageParam: undefined as { id: string } | undefined,
-					getNextPageParam: (lastPage, allPages) => {
-						console.log("Last page:", lastPage);
-						console.log("All pages:", allPages);
+					getNextPageParam: (lastPage) => {
 						if (!lastPage || lastPage.length === 0) return undefined;
 						if ("nextCursor" in lastPage) return lastPage.nextCursor;
 						const lastItem = lastPage[lastPage.length - 1];
