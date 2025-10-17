@@ -28,7 +28,15 @@ export default function createRouter() {
 
         findFirstOrThrow: procedure.input($Schema.TodoInputSchema.findFirst.optional()).query(({ ctx, input }) => checkRead(db(ctx).todo.findFirstOrThrow(input as any))),
 
-        findMany: procedure.input($Schema.TodoInputSchema.findMany.optional()).query(({ ctx, input }) => checkRead(db(ctx).todo.findMany(input as any))),
+        findMany: procedure.input($Schema.TodoInputSchema.findMany.optional()).query(({ ctx, input }) => {
+			const { cursor, ...rest } = input || {};
+			const modifiedInput = {
+						...rest,
+						skip: cursor ? 1 : 0,
+						cursor: cursor ?? undefined,
+				  };
+			return checkRead(db(ctx).todo.findMany(modifiedInput as any));
+		}),
 
         findUnique: procedure.input($Schema.TodoInputSchema.findUnique).query(({ ctx, input }) => checkRead(db(ctx).todo.findUnique(input as any))),
 

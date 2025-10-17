@@ -5,8 +5,8 @@ import type {
 	UserModel,
 } from "@generated/zenstack/models";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import { useTRPC } from "@lib/trpc";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { trpcClient, useTRPC } from "@lib/trpc";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import BreadCrumb from "components/BreadCrumb";
 import TodoComponent from "components/Todo";
 import WithNavBar from "components/WithNavBar";
@@ -40,7 +40,33 @@ export default function TodoList(props: Props) {
 		),
 	);
 
-	const { data } = useQuery(trpc.todo.findMany.queryOptions({}));
+	const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+		useInfiniteQuery(
+			trpc.todo.findMany.infiniteQueryOptions(
+				{
+					where: { listId: props.list.id },
+					include: { owner: true },
+					take: 1,
+					orderBy: { updatedAt: "asc" },
+				},
+				{
+					initialPageParam: undefined as { id: string } | undefined,
+					getNextPageParam: (lastPage, allPages) => {
+						console.log("Last page:", lastPage);
+						console.log("All pages:", allPages);
+						if (!lastPage || lastPage.length === 0) return undefined;
+						if ("nextCursor" in lastPage) return lastPage.nextCursor;
+						const lastItem = lastPage[lastPage.length - 1];
+						return { id: lastItem.id };
+					},
+				},
+			),
+		);
+
+	// Access the data
+	const allTodos = data?.pages.flat(); // Type: (Todo & { owner: User })[]
+
+	// const { data } = useQuery(trpc.todo.findMany.queryOptions({}));
 
 	const { mutateAsync: createTodo } = useMutation(
 		trpc.todo.create.mutationOptions(),
@@ -106,6 +132,18 @@ export default function TodoList(props: Props) {
 						/>
 					))}
 				</ul>
+			</div>
+			<div>
+				{allTodos?.map((todo) => (
+					<div key={todo.id}>
+						{todo.title} by {todo.owner?.email} - {todo.id}
+					</div>
+				))}
+				{hasNextPage && (
+					<button type="button" onClick={() => fetchNextPage()}>
+						Load More
+					</button>
+				)}
 			</div>
 		</WithNavBar>
 	);
